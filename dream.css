@@ -1,0 +1,61 @@
+@import '@fontsource-variable/fraunces';
+
+/* ===== Pudo Ser: what could have been. Scoped to body.sub-dream so it never touches the main blog. ===== */
+.sub-dream {
+  --mist: #c9bfe6;
+  --soft: #8f84b3;
+  --glow: #f0b8c8;
+  --deep: #120d24;
+  margin: 0;
+  min-height: 100vh;
+  color: #dcd4f0;
+  font-family: 'Fraunces Variable', Georgia, serif;
+  font-weight: 300;
+  background: linear-gradient(180deg, #0d0a1c 0%, #1b1238 45%, #3a2150 80%, #5a3558 100%) fixed;
+  position: relative;
+}
+.sub-dream *, .sub-dream *::before, .sub-dream *::after { box-sizing: border-box; }
+.dream-mist {
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(240, 184, 200, 0.14), transparent 40%),
+    radial-gradient(circle at 80% 60%, rgba(143, 132, 179, 0.2), transparent 45%),
+    radial-gradient(circle at 50% 90%, rgba(255, 220, 190, 0.1), transparent 50%);
+  animation: drift 28s ease-in-out infinite alternate;
+}
+@keyframes drift { from { transform: translate3d(-2%, -1%, 0) scale(1); } to { transform: translate3d(2%, 2%, 0) scale(1.08); } }
+.sub-dream .sub-header, .sub-dream .sub-main, .sub-dream .sub-footer { position: relative; z-index: 1; max-width: 40rem; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem; }
+.sub-dream a { color: var(--mist); }
+.sub-dream .sub-header { padding-top: 1.75rem; display: flex; justify-content: space-between; align-items: baseline; }
+.sub-dream .sub-brand { text-decoration: none; font-style: italic; font-size: 1.15rem; color: var(--glow); letter-spacing: 0.04em; }
+.sub-dream .sub-exit { text-decoration: none; font-size: 0.8rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--soft); }
+.sub-dream .sub-main { padding-top: 4rem; padding-bottom: 5rem; animation: rise 2.4s ease both; }
+.sub-dream .sub-footer { padding-bottom: 3rem; text-align: center; color: var(--soft); font-style: italic; font-size: 0.9rem; }
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+.dream-hero { text-align: center; margin-bottom: 4.5rem; }
+.dream-hero h1 { font-size: clamp(3rem, 12vw, 5.5rem); font-weight: 200; font-style: italic; letter-spacing: 0.02em; margin: 0; color: #f6ecff; text-shadow: 0 0 40px rgba(240, 184, 200, 0.45); }
+.dream-hero .translates { margin: 0.6rem 0 0; color: var(--soft); font-size: 0.95rem; letter-spacing: 0.3em; text-transform: uppercase; }
+.dream-hero p.lede { max-width: 28rem; margin: 2rem auto 0; line-height: 1.8; color: #bfb4de; font-size: 1.05rem; }
+
+.fragments { list-style: none; margin: 0; padding: 0; display: grid; gap: 3rem; }
+.fragments a { display: block; text-decoration: none; text-align: center; padding: 0.5rem 0; }
+.fragments .f-date { display: block; font-size: 0.78rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--soft); margin-bottom: 0.6rem; }
+.fragments .f-title { display: block; font-size: 1.7rem; font-weight: 300; color: #efe5ff; transition: color 0.6s, text-shadow 0.6s; }
+.fragments .f-version { display: block; margin-top: 0.5rem; font-style: italic; color: #a89dca; }
+.fragments a:hover .f-title { color: var(--glow); text-shadow: 0 0 24px rgba(240, 184, 200, 0.5); }
+.orn { text-align: center; color: var(--soft); letter-spacing: 1em; margin: 3rem 0; }
+
+.fragment h1 { font-size: clamp(2.2rem, 7vw, 3.3rem); font-weight: 200; font-style: italic; text-align: center; margin: 0 0 0.75rem; color: #f6ecff; text-shadow: 0 0 30px rgba(240, 184, 200, 0.35); line-height: 1.15; }
+.fragment .f-version { text-align: center; font-style: italic; color: var(--glow); margin: 0 0 0.4rem; font-size: 1.1rem; }
+.fragment .f-date { text-align: center; font-size: 0.78rem; letter-spacing: 0.28em; text-transform: uppercase; color: var(--soft); margin: 0 0 3rem; }
+.fragment-body p { font-size: 1.15rem; line-height: 2; margin: 0 0 1.6rem; }
+.fragment-body em { color: var(--glow); }
+.back-room { display: block; text-align: center; margin-bottom: 3rem; font-size: 0.8rem; letter-spacing: 0.25em; text-transform: uppercase; text-decoration: none; color: var(--soft); }
+.fragment-end { text-align: center; color: var(--soft); font-style: italic; margin-top: 4rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  .dream-mist, .sub-dream .sub-main { animation: none; }
+}
+
+html[data-theme='dream'] { background: #1b1238; }

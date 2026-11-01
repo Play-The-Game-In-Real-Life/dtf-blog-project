@@ -1,0 +1,164 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { APPS } from '../../data/apps';
+import { realmColor } from '../../consts';
+import {
+  GATE_COOKIE,
+  SESSION_SECONDS,
+  FAILED_LOGIN_DELAY_MS,
+  checkPassword,
+  createSession,
+  getGateConfig,
+  isSameOrigin,
+  sleep,
+  verifySession,
+} from '../../lib/gate';
+
+// Rendered per request, never prerendered: the app links must only reach a signed-in browser.
+export const prerender = false;
+
+Astro.response.headers.set('Cache-Control', 'no-store, private');
+Astro.response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
+const config = getGateConfig(Astro.locals);
+const secure = Astro.url.protocol === 'https:';
+let error = '';
+
+if (config && Astro.request.method === 'POST') {
+  if (!isSameOrigin(Astro.request)) {
+    return new Response('Forbidden', { status: 403 });
+  }
+  const form = await Astro.request.formData();
+
+  if (form.get('action') === 'logout') {
+    Astro.cookies.delete(GATE_COOKIE, { path: '/gate' });
+    return Astro.redirect('/gate/', 303);
+  }
+
+  const attempt = form.get('key');
+  if (typeof attempt === 'string' && attempt.length <= 256 && (await checkPassword(attempt, config))) {
+    Astro.cookies.set(GATE_COOKIE, await createSession(config), {
+      httpOnly: true,
+      secure,
+      sameSite: 'strict',
+      path: '/gate',
+      maxAge: SESSION_SECONDS,
+    });
+    return Astro.redirect('/gate/', 303);
+  }
+  await sleep(FAILED_LOGIN_DELAY_MS);
+  error = 'That key did not work. (It is not her birthday either.)';
+}
+
+const authed = config ? await verifySession(Astro.cookies.get(GATE_COOKIE)?.value, config) : false;
+
+// Group cards under their `group` heading, keeping the order they were written in.
+const groups = new Map<string, typeof APPS>();
+for (const app of APPS) {
+  const key = app.group ?? '';
+  groups.set(key, [...(groups.get(key) ?? []), app]);
+}
+const hostOf = (url: string) => {
+  try {
+    return new URL(url).host;
+  } catch {
+    return url;
+  }
+};
+---
+
+<Layout title="Vault" description="Private access." noindex>
+  {!config && (
+    <header class="header">
+      <h1>Vault</h1>
+      <p class="tagline">The vault is sealed: it has not been configured.</p>
+    </header>
+  )}
+
+  {config && !authed && (
+    <section class="gate-login" aria-labelledby="gate-title">
+      <div class="boot gate-panel">
+        <p class="gate-prompt"><span class="boot-prompt">$</span> vault --unlock</p>
+        <h1 id="gate-title" class="gate-title">The Vault</h1>
+        <p class="gate-note">Private. Joe only. Attempts are logged, and judged.</p>
+        <form method="post" action="/gate/" class="gate-form">
+          <label for="key">Access key</label>
+          <input
+            id="key"
+            name="key"
+            type="password"
+            autocomplete="current-password"
+            required
+            autofocus
+            maxlength="256"
+          />
+          {error && <p class="gate-error" role="alert">{error}</p>}
+          <button type="submit">Enter</button>
+        </form>
+      </div>
+    </section>
+  )}
+
+  {config && authed && (
+    <>
+      <header class="header gate-header">
+        <div>
+          <h1>The Vault</h1>
+          <p class="tagline">Private things Joe is not ready to publish.</p>
+        </div>
+        <form method="post" action="/gate/">
+          <input type="hidden" name="action" value="logout" />
+          <button type="submit" class="gate-signout">Sign out</button>
+        </form>
+      </header>
+
+      {APPS.length === 0 ? (
+        <p class="empty">Nothing in the vault yet. Add entries to src/data/apps.ts.</p>
+      ) : (
+        <>
+          {APPS.length > 6 && (
+            <div class="gate-filter">
+              <label for="filter" class="sr-only">Filter the vault</label>
+              <input id="filter" type="search" placeholder="Filter the vault" autocomplete="off" />
+            </div>
+          )}
+          {[...groups.entries()].map(([group, apps]) => (
+            <section class="app-group">
+              {group && <h2 class="app-group-title">{group}</h2>}
+              <div class="app-grid">
+                {apps.map((app) => (
+                  <a
+                    href={app.url}
+                    class="app-card"
+                    style={`--zone:${realmColor(app.tag ?? '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    data-name={`${app.name} ${app.description ?? ''} ${app.group ?? ''}`.toLowerCase()}
+                  >
+                    <h3>{app.name}</h3>
+                    {app.description && <p>{app.description}</p>}
+                    <span class="app-host">{hostOf(app.url)}</span>
+                  </a>
+                ))}
+              </div>
+            </section>
+          ))}
+        </>
+      )}
+    </>
+  )}
+</Layout>
+
+<script>
+  const input = document.getElementById('filter') as HTMLInputElement | null;
+  if (input) {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>('.app-card'));
+    input.addEventListener('input', () => {
+      const q = input.value.trim().toLowerCase();
+      for (const card of cards) card.hidden = q !== '' && !(card.dataset.name ?? '').includes(q);
+      for (const group of document.querySelectorAll<HTMLElement>('.app-group')) {
+        group.hidden = !group.querySelector('.app-card:not([hidden])');
+      }
+    });
+  }
+</script>

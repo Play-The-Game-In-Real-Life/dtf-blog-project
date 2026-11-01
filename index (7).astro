@@ -1,0 +1,35 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import { REALMS } from '../../consts';
+import { getPublishedPosts, getTags, tagUrl } from '../../lib/posts';
+
+const posts = await getPublishedPosts();
+const countByTag = new Map(getTags(posts).map((t) => [t.tag, t.count]));
+const blurb = 'The known world. Six realms, one common factor.';
+---
+
+<Layout title="Realms" description={blurb}>
+  <header class="header">
+    <h1>The realms</h1>
+    <p class="tagline">{blurb}</p>
+  </header>
+
+  <section class="zones" aria-label="Realms">
+    {REALMS.map((realm) => {
+      const count = countByTag.get(realm.tag) ?? 0;
+      return (
+        <a href={tagUrl(realm.tag)} class="zone" style={`--zone:${realm.color}`}>
+          <div class="zone-body">
+            <img class="zone-img" src={realm.image} alt={realm.imageAlt} width="400" height="250" loading="lazy" />
+            <p class="zone-era">{realm.era}</p>
+            <h2>{realm.tag}</h2>
+            <p class="zone-realm">{realm.title}</p>
+            <p class="zone-source">{realm.character} / {realm.show}</p>
+            <p><strong>Status:</strong> {realm.status}</p>
+            <span class="zone-count">{count} {count === 1 ? 'chronicle' : 'chronicles'}</span>
+          </div>
+        </a>
+      );
+    })}
+  </section>
+</Layout>

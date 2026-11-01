@@ -1,0 +1,25 @@
+---
+import { getCollection, render } from 'astro:content';
+import SubLayout from '../../layouts/SubLayout.astro';
+
+export async function getStaticPaths() {
+  const fragments = await getCollection('dreams', ({ data }) => !data.draft);
+  return fragments.map((f) => ({ params: { slug: f.id }, props: { f } }));
+}
+
+const { f } = Astro.props;
+const { Content } = await render(f);
+const date = f.data.pubDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<SubLayout theme="dream" title={f.data.title} description={f.data.version} brand="Pudo Ser" brandHref="/pudo-ser/">
+  <a href="/pudo-ser/" class="back-room">← the room</a>
+  <article class="fragment">
+    <h1>{f.data.title}</h1>
+    <p class="f-version">{f.data.version}</p>
+    <p class="f-date">{date}</p>
+    <div class="fragment-body"><Content /></div>
+    <p class="fragment-end">· · ·</p>
+  </article>
+  <p slot="footer">none of this happened. that is the point.</p>
+</SubLayout>

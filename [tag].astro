@@ -1,0 +1,62 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import PostCard from '../../components/PostCard.astro';
+import TagFilter from '../../components/TagFilter.astro';
+import { REALMS, realmColor } from '../../consts';
+import { getPublishedPosts, getTags } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  const posts = await getPublishedPosts();
+  return getTags(posts).map(({ tag, slug }) => ({
+    params: { tag: slug },
+    props: { tag, allPosts: posts, tagPosts: posts.filter((p) => p.data.tag === tag) },
+  }));
+}
+
+const { tag, allPosts, tagPosts } = Astro.props;
+const realm = REALMS.find((r) => r.tag === tag);
+const blurb = realm?.description ?? `Chronicles filed under ${tag}.`;
+const dossier = realm
+  ? [
+      { label: 'Realm', value: realm.title },
+      { label: 'Codename', value: `${realm.tag}, after ${realm.character} (${realm.show}). ${realm.twist}` },
+      { label: 'Era', value: realm.era },
+      { label: 'Status', value: realm.status },
+      { label: 'How it ended', value: realm.fall },
+      { label: 'Joe\u2019s verdict', value: realm.verdict },
+    ]
+  : [];
+---
+
+<Layout title={`${tag}: ${realm?.title ?? 'Realm'}`} description={blurb} image={realm?.image}>
+  <header class="header realm-header" style={`--zone:${realmColor(tag)}`}>
+    <div class="realm-header-text">
+      <a href="/realms/" class="back-link">← All realms</a>
+      <p class="realm-era">{realm?.era ?? 'Uncharted'}</p>
+      <h1 class="post-title">{tag}</h1>
+      <p class="realm-title">{realm?.title ?? 'An uncharted territory'}</p>
+      <p class="tagline">{blurb}</p>
+    </div>
+    {realm && <img class="realm-portrait" src={realm.image} alt={realm.imageAlt} width="400" height="500" />}
+  </header>
+
+  {dossier.length > 0 && (
+    <section class="dossier" style={`--zone:${realmColor(tag)}`} aria-label="Realm dossier">
+      <h2 class="block-title">Dossier</h2>
+      <dl class="stack">
+        {dossier.map((row) => (
+          <div class="stack-row">
+            <dt>{row.label}</dt>
+            <dd>{row.value}</dd>
+          </div>
+        ))}
+      </dl>
+    </section>
+  )}
+
+  <TagFilter posts={allPosts} current={tag} />
+
+  <div class="log-grid">
+    {tagPosts.map((post) => <PostCard post={post} />)}
+  </div>
+</Layout>

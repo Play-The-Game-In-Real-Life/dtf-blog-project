@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <path d="M0 0h25l7 7v25H7l-7-7z" fill="#0d0710"/>
+  <path d="M16 26.5 6.4 17A5.6 5.6 0 0 1 16 10.9 5.6 5.6 0 0 1 25.6 17Z" fill="#ff6fa8" transform="translate(-1.1 0)"/>
+  <path d="M16 26.5 6.4 17A5.6 5.6 0 0 1 16 10.9 5.6 5.6 0 0 1 25.6 17Z" fill="#b79cff" transform="translate(1.1 0)" style="mix-blend-mode:screen"/>
+</svg>

@@ -1,0 +1,47 @@
+---
+import { getCollection, render } from 'astro:content';
+import SubLayout from '../../layouts/SubLayout.astro';
+
+export async function getStaticPaths() {
+  const cases = await getCollection('cases', ({ data }) => !data.draft);
+  return cases.map((c) => ({ params: { slug: c.id }, props: { c } }));
+}
+
+const { c } = Astro.props;
+const { Content } = await render(c);
+const filed = c.data.filed.toISOString().slice(0, 10);
+const statusClass = `stamp-${c.data.status.toLowerCase().replace(/\s+/g, '-')}`;
+---
+
+<SubLayout theme="case" title={c.data.caseNo} description={c.data.summary} brand="The Grudge Book" brandHref="/grudges/">
+  <a href="/grudges/" class="back-docket">← Back to the docket</a>
+
+  <article class="file">
+    <div class="file-top">
+      <div>
+        <p class="file-no">Case No. {c.data.caseNo}</p>
+        <h1>{c.data.title}</h1>
+      </div>
+      <span class={`stamp ${statusClass}`}>{c.data.status}</span>
+    </div>
+
+    <dl class="file-meta">
+      <div><dt>Defendant</dt><dd>{c.data.defendant}</dd></div>
+      <div><dt>Date filed</dt><dd>{filed}</dd></div>
+      <div><dt>Counts</dt><dd>{c.data.charges.length}</dd></div>
+    </dl>
+
+    <h2>Summary of the matter</h2>
+    <p class="summary">{c.data.summary}</p>
+
+    <h2>Charges</h2>
+    <ol class="charges">
+      {c.data.charges.map((ch) => <li>{ch}</li>)}
+    </ol>
+
+    <h2>Transcript and findings</h2>
+    <div class="file-body"><Content /></div>
+  </article>
+
+  <p slot="footer">case no. {c.data.caseNo} / end of file</p>
+</SubLayout>

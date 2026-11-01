@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /gate/
+
+Sitemap: https://damnthesefeelings.com/sitemap-index.xml

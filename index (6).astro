@@ -1,0 +1,120 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PostCard from '../components/PostCard.astro';
+import { SITE, REALMS, PATTERNS, TIMELINE, ROADMAP, RECENT_POST_LIMIT } from '../consts';
+import { getPublishedPosts, getTags, tagUrl } from '../lib/posts';
+
+const posts = await getPublishedPosts();
+const recent = posts.slice(0, RECENT_POST_LIMIT);
+const countByTag = new Map(getTags(posts).map((t) => [t.tag, t.count]));
+---
+
+<Layout>
+  <header class="hero">
+    <div class="boot" aria-hidden="true">
+      <p class="boot-line" style="--i:0"><span class="boot-prompt">$</span> boot dtf</p>
+      <p class="boot-line" style="--i:1">closure <span class="boot-dots"></span> <span class="boot-skip">declined</span></p>
+      <p class="boot-line" style="--i:2">feelings <span class="boot-dots"></span> <span class="boot-skip">unresolved</span></p>
+      <p class="boot-line" style="--i:3">texts sent at 1am <span class="boot-dots"></span> <span class="boot-ok">logged</span></p>
+      <p class="boot-line boot-ready" style="--i:4">joe is ready (he is not)<span class="cursor"></span></p>
+    </div>
+
+    <h1 class="hero-title">{SITE.name}</h1>
+    <p class="hero-sub">Damn these feelings.</p>
+    <p class="tagline">{SITE.description}</p>
+  </header>
+
+  <section class="intro-text">
+    <p>
+      Every relationship is a kingdom. Each one rose, each one fell, and this site is the official chronicle of how, written by the one person who was in every single war. That would be Joe, the narrator. It makes him both the historian and the suspect.
+    </p>
+    <p>
+      The format is simple: every ex is a <strong>realm</strong> with its own page, its own color, its own portrait, and its own dossier. Each one is codenamed after one of Joe Goldberg’s exes from <em>You</em>, with a French twist, so Love Quinn reigns as <strong>Amour</strong>. The chronicles filed under each realm tell the lore. A separate realm, the Capital, covers the present day: how Joe actually acts, texts, and copes, mocked with love by Joe.
+    </p>
+  </section>
+
+  <section class="notice" aria-labelledby="notice-title">
+    <h2 id="notice-title">Disclaimer from the crown</h2>
+    <p>
+      Every realm appears under a codename. Names are changed. Feelings are not. Nobody in the lore is the villain, except possibly the narrator, who is also the author and therefore very much has a conflict of interest. If you recognize yourself here, that is a coincidence, and also the site would like you to know it said nice things about the couch.
+    </p>
+  </section>
+
+  <section class="zones" aria-label="Realms">
+    {REALMS.map((realm) => {
+      const count = countByTag.get(realm.tag) ?? 0;
+      return (
+        <a href={tagUrl(realm.tag)} class="zone" style={`--zone:${realm.color}`}>
+          <div class="zone-body">
+            <img class="zone-img" src={realm.image} alt={realm.imageAlt} width="400" height="250" loading="lazy" />
+            <p class="zone-era">{realm.era}</p>
+            <h2>{realm.tag}</h2>
+            <p class="zone-realm">{realm.title}</p>
+            <p class="zone-source">{realm.character} / {realm.show}</p>
+            <p>{realm.description}</p>
+            <span class="zone-count">{count} {count === 1 ? 'chronicle' : 'chronicles'}</span>
+          </div>
+        </a>
+      );
+    })}
+  </section>
+
+  <section class="log-section">
+    <div class="section-header">
+      <h2>Recent chronicles</h2>
+      <a href="/rss.xml" class="rss-link" target="_blank" rel="noopener">RSS</a>
+    </div>
+    {recent.length === 0 ? (
+      <p class="empty">No chronicles yet. The first entry goes in src/content/blog/.</p>
+    ) : (
+      <div class="log-grid">
+        {recent.map((post) => <PostCard post={post} />)}
+      </div>
+    )}
+    {posts.length > recent.length && <a href="/chronicles/" class="section-link">All {posts.length} chronicles</a>}
+  </section>
+
+  <section class="stack-section" aria-labelledby="patterns-title">
+    <h2 id="patterns-title" class="block-title">Field notes on the subject</h2>
+    <p class="block-lede">
+      A running, entirely unscientific record of how Joe behaves in the wild. Compiled by Joe. Corrected by no one, which is part of the problem.
+    </p>
+    <dl class="stack">
+      {PATTERNS.map((row) => (
+        <div class="stack-row">
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="stack-section" aria-labelledby="timeline-title">
+    <h2 id="timeline-title" class="block-title">The timeline of the realms</h2>
+    <p class="block-lede">
+      A short history of the ages, in the order they happened and in a tone Joe finds more bearable than the real one.
+    </p>
+    <dl class="stack">
+      {TIMELINE.map((row) => (
+        <div class="stack-row">
+          <dt>{row.label}</dt>
+          <dd>{row.value}</dd>
+        </div>
+      ))}
+    </dl>
+  </section>
+
+  <section class="roadmap-section" aria-labelledby="road-title">
+    <h2 id="road-title" class="block-title">Healing roadmap (allegedly)</h2>
+    <div class="roadmap">
+      {ROADMAP.map((item) => (
+        <div class="road">
+          <h3>{item.title}</h3>
+          <ul>
+            {item.points.map((pt) => <li>{pt}</li>)}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>

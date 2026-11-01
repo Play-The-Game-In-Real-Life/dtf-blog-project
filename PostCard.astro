@@ -1,0 +1,20 @@
+---
+import { formatDate, postUrl, type Post } from '../lib/posts';
+import { realmColor } from '../consts';
+
+interface Props {
+  post: Post;
+}
+
+const { post } = Astro.props;
+---
+
+<a href={postUrl(post)} class="log-card" style={`--zone:${realmColor(post.data.tag)}`}>
+  <div class="log-meta">
+    <span class="log-tag">[{post.data.tag}]</span>
+    <span class="log-date">{formatDate(post.data.pubDate)}</span>
+    {post.data.mood && <span class="log-mood">mood: {post.data.mood}</span>}
+  </div>
+  <h3 class="log-title">{post.data.title}</h3>
+  <p class="log-desc">{post.data.description}</p>
+</a>

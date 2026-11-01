@@ -1,0 +1,43 @@
+---
+// Shared shell for the standalone sub-blogs (The Grudge Book, Pudo Ser).
+// Deliberately has NO nav, footer, or links back to the main blog: each sub-blog stands alone.
+import '../styles/case.css';
+import '../styles/dream.css';
+import { SITE } from '../consts';
+
+interface Props {
+  theme: 'case' | 'dream';
+  title?: string;
+  description?: string;
+  /** Name shown in the sub-blog's own header. */
+  brand: string;
+  brandHref: string;
+}
+
+const { theme, title, description, brand, brandHref } = Astro.props;
+const fullTitle = title ? `${title}: ${brand}` : brand;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en" data-theme={theme}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonical} />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description ?? SITE.description} />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="theme-color" content={theme === 'case' ? '#0b0b0d' : '#120d24'} />
+  </head>
+  <body class={`sub sub-${theme}`}>
+    {theme === 'dream' && <div class="dream-mist" aria-hidden="true"></div>}
+    <header class="sub-header">
+      <a href={brandHref} class="sub-brand">{brand}</a>
+      <a href="/gate/" class="sub-exit">leave</a>
+    </header>
+    <main class="sub-main"><slot /></main>
+    <footer class="sub-footer"><slot name="footer" /></footer>
+  </body>
+</html>

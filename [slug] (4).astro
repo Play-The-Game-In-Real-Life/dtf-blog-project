@@ -1,0 +1,61 @@
+---
+import { render } from 'astro:content';
+import Layout from '../../layouts/Layout.astro';
+import { formatDate, getPublishedPosts, postUrl, tagUrl } from '../../lib/posts';
+import { realmColor, realmByTag } from '../../consts';
+
+export async function getStaticPaths() {
+  // Published posts only: drafts never get a page.
+  const posts = await getPublishedPosts(); // newest first
+  return posts.map((post, i) => ({
+    params: { slug: post.id },
+    props: { post, newer: posts[i - 1], older: posts[i + 1] },
+  }));
+}
+
+const { post, newer, older } = Astro.props;
+const { Content } = await render(post);
+const realm = realmByTag(post.data.tag);
+const banner = post.data.heroImage;
+const shareImage = banner ?? realm?.image;
+---
+
+<Layout title={post.data.title} description={post.data.description} type="article" image={shareImage}>
+  <header class="header" style={`--zone:${realmColor(post.data.tag)}`}>
+    <a href="/chronicles/" class="back-link">← All chronicles</a>
+    <h1 class="post-title">{post.data.title}</h1>
+    <div class="log-meta">
+      <a href={tagUrl(post.data.tag)} class="log-tag">[{post.data.tag}]</a>
+      <time class="log-date" datetime={formatDate(post.data.pubDate)}>{formatDate(post.data.pubDate)}</time>
+      {post.data.mood && <span class="log-mood">mood: {post.data.mood}</span>}
+    </div>
+    {realm && <p class="realm-line">Filed under {realm.title}.</p>}
+  </header>
+
+  {banner && (
+    <figure class="post-banner">
+      <img src={banner} alt={post.data.heroAlt ?? post.data.title} width="1600" height="900" />
+    </figure>
+  )}
+
+  <article class="prose" style={`--zone:${realmColor(post.data.tag)}`}>
+    <Content />
+  </article>
+
+  {(newer || older) && (
+    <nav class="post-nav" aria-label="More chronicles">
+      {older && (
+        <a href={postUrl(older)} class="prev" rel="prev">
+          <span class="dir">← Older</span>
+          {older.data.title}
+        </a>
+      )}
+      {newer && (
+        <a href={postUrl(newer)} class="next" rel="next">
+          <span class="dir">Newer →</span>
+          {newer.data.title}
+        </a>
+      )}
+    </nav>
+  )}
+</Layout>

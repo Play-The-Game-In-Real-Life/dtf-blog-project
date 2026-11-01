@@ -7,8 +7,12 @@ import cloudflare from "@astrojs/cloudflare";
 
 // https://astro.build/config
 export default defineConfig({
-	site: "https://example.com",
-	integrations: [mdx(), sitemap()],
+	site: "https://damnthesefeelings.com",
+	trailingSlash: "always",
+	integrations: [mdx(), sitemap({
+			// The vault and the sub-blogs behind it are private: keep them out of the sitemap.
+			filter: (page) => !["/gate", "/grudges", "/pudo-ser"].some((p) => new URL(page).pathname.startsWith(p)),
+		}),],
 	adapter: cloudflare({
 		platformProxy: {
 			enabled: true,

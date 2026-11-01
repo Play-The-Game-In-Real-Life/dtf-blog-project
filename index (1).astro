@@ -1,0 +1,33 @@
+---
+import { getCollection } from 'astro:content';
+import SubLayout from '../../layouts/SubLayout.astro';
+
+const cases = (await getCollection('cases', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.caseNo.localeCompare(a.data.caseNo),
+);
+const blurb = 'One page per case. The charge, the evidence, the transcript, and the ruling.';
+---
+
+<SubLayout theme="case" title="Docket" description={blurb} brand="The Grudge Book" brandHref="/grudges/">
+  <section class="case-hero">
+    <h1>Active docket</h1>
+    <p>{blurb} Every defendant is entitled to a fair hearing. This court makes no promises about the defendant being Joe.</p>
+  </section>
+
+  <ul class="docket">
+    {cases.map((c) => (
+      <li>
+        <a href={`/grudges/${c.id}/`}>
+          <span class="case-no">{c.data.caseNo}</span>
+          <span>
+            <span class="case-title">{c.data.title}</span>
+            <span class="case-def">Defendant: {c.data.defendant}</span>
+          </span>
+          <span class={`stamp stamp-${c.data.status.toLowerCase().replace(/\s+/g, '-')}`}>{c.data.status}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <p slot="footer">court is always in session</p>
+</SubLayout>

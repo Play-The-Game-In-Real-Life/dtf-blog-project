@@ -1,0 +1,29 @@
+---
+import { getTags, tagUrl, type Post } from '../lib/posts';
+import { realmColor } from '../consts';
+
+interface Props {
+  posts: Post[];
+  /** Currently selected realm, or undefined for "all". */
+  current?: string;
+}
+
+const { posts, current } = Astro.props;
+const tags = getTags(posts);
+---
+
+<nav class="tag-filter" aria-label="Filter chronicles by realm">
+  <a href="/chronicles/" class:list={['tag-pill', { active: !current }]} aria-current={!current ? 'page' : undefined}>
+    all realms <span>{posts.length}</span>
+  </a>
+  {tags.map(({ tag, count }) => (
+    <a
+      href={tagUrl(tag)}
+      class:list={['tag-pill', { active: current === tag }]}
+      style={`--zone:${realmColor(tag)}`}
+      aria-current={current === tag ? 'page' : undefined}
+    >
+      {tag} <span>{count}</span>
+    </a>
+  ))}
+</nav>

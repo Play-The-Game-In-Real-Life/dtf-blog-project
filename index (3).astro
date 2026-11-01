@@ -1,0 +1,31 @@
+---
+import { getCollection } from 'astro:content';
+import SubLayout from '../../layouts/SubLayout.astro';
+
+const fragments = (await getCollection('dreams', ({ data }) => !data.draft)).sort(
+  (a, b) => b.data.pubDate.getTime() - a.data.pubDate.getTime(),
+);
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+---
+
+<SubLayout theme="dream" title="what could have been" description="A quiet room for lives that never got to happen." brand="Pudo Ser" brandHref="/pudo-ser/">
+  <section class="dream-hero">
+    <h1>Pudo Ser</h1>
+    <p class="translates">could have been</p>
+    <p class="lede">A quiet room for the lives that never got to happen. The apartments, the mornings, and the people we almost turned into. Nothing here is true. All of it was possible.</p>
+  </section>
+
+  <ul class="fragments">
+    {fragments.map((f) => (
+      <li>
+        <a href={`/pudo-ser/${f.id}/`}>
+          <span class="f-date">{fmt(f.data.pubDate)}</span>
+          <span class="f-title">{f.data.title}</span>
+          <span class="f-version">{f.data.version}</span>
+        </a>
+      </li>
+    ))}
+  </ul>
+
+  <p slot="footer">none of this happened. that is the point.</p>
+</SubLayout>
